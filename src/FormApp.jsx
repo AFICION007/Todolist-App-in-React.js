@@ -33,6 +33,19 @@ const FormApp = () => {
     event.target.reset();
   };
 
+  const handleDelete = (id) => {
+    setTodos(todos.filter((todo) => todo.id != id));
+  };
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const FilteredTodos = todos.filter(({ task, subtask, tag }) => {
+    return (
+      task.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      subtask.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tag.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
+
   return (
     <>
       <div className="form-container">
@@ -95,7 +108,7 @@ const FormApp = () => {
       </div>
       <div className="todolist-container">
         <ul>
-          {todos.map(
+          {FilteredTodos.map(
             ({
               id,
               task,
@@ -106,25 +119,53 @@ const FormApp = () => {
               subtask,
               tag,
             }) => (
-              <li key={id}>
-                <span>{task}</span>
-                <br />
-                <input type="checkbox" checked={is_completed}></input>
-                <br />
-                <span>{category}</span>
-                <br />
-                <span>{due_date}</span>
-                <br />
-                <span>{priority}</span>
-                <br />
-                <span>{subtask}</span>
-                <br />
-                <span>{tag}</span>
-                <br />
-              </li>
+              <>
+                <li key={id}>
+                  <span>{task}</span>
+                  <br />
+                  <input type="checkbox" checked={is_completed}></input>
+                  <br />
+                  <span>{category}</span>
+                  <br />
+                  <span>{due_date}</span>
+                  <br />
+                  <span>{priority}</span>
+                  <br />
+                  <span>{subtask}</span>
+                  <br />
+                  <span>{tag}</span>
+                  <br />
+                </li>
+                <button onClick={() => handleDelete(id)}>delete</button>
+                {/* <button
+                  onClick={() =>
+                    handleEdit(
+                      id,
+                      task,
+                      is_completed,
+                      category,
+                      due_date,
+                      priority,
+                      subtask,
+                      tag
+                    )
+                  }
+                >
+                  edit
+                </button> */}
+              </>
             )
           )}
         </ul>
+      </div>
+      <div className="search-container">
+        <input
+          type="text"
+          placeholder="search task"
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+        />
+        <button>Search</button>
       </div>
     </>
   );
