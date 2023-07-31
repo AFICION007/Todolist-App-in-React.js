@@ -10,7 +10,6 @@ const FormApp = () => {
 
   const AddTask = (event) => {
     event.preventDefault();
-
     const { task, is_completed, category, due_date, priority, subtask, tag } =
       event.target.elements;
 
@@ -29,22 +28,64 @@ const FormApp = () => {
     ]);
 
     setCount(count + 1);
-
     event.target.reset();
   };
 
   const handleDelete = (id) => {
-    setTodos(todos.filter((todo) => todo.id != id));
+    setTodos(todos.filter((todo) => todo.id !== id));
   };
 
   const [searchQuery, setSearchQuery] = useState("");
-  const FilteredTodos = todos.filter(({ task, subtask, tag }) => {
-    return (
-      task.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      subtask.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tag.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+  const [filters, setFilters] = useState({
+    fromDate: "",
+    toDate: "",
+    category: "",
+    priority: "",
   });
+
+  const handleFilterBy = (event) => {
+    event.preventDefault();
+    const { filterFrom, filterTo, filterCategory, filterPriority } =
+      event.target.elements;
+
+    setFilters({
+      fromDate: filterFrom.value,
+      toDate: filterTo.value,
+      category: filterCategory.value,
+      priority: filterPriority.value,
+    });
+  };
+
+  const handleFilterReset = (event) => {
+    event.preventDefault();
+    setFilters({
+      fromDate: "",
+      toDate: "",
+      category: "",
+      priority: "",
+    });
+
+    const filterForm = event.target.closest("form");
+    filterForm.reset();
+  };
+
+  const filteredTodos = todos.filter(
+    ({ task, subtask, tag, due_date, category, priority }) => {
+      const isMatchingSearch =
+        task.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        subtask.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        tag.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const isMatchingFilter =
+        (!filters.fromDate ||
+          new Date(due_date) >= new Date(filters.fromDate)) &&
+        (!filters.toDate || new Date(due_date) <= new Date(filters.toDate)) &&
+        (!filters.category || filters.category === category) &&
+        (!filters.priority || filters.priority === priority);
+
+      return isMatchingSearch && isMatchingFilter;
+    }
+  );
 
   return (
     <>
@@ -108,7 +149,7 @@ const FormApp = () => {
       </div>
       <div className="todolist-container">
         <ul>
-          {FilteredTodos.map(
+          {filteredTodos.map(
             ({
               id,
               task,
@@ -119,7 +160,6 @@ const FormApp = () => {
               subtask,
               tag,
             }) => (
-              <>
                 <li key={id}>
                   <span>{task}</span>
                   <br />
@@ -135,7 +175,6 @@ const FormApp = () => {
                   <br />
                   <span>{tag}</span>
                   <br />
-                </li>
                 <button onClick={() => handleDelete(id)}>delete</button>
                 {/* <button
                   onClick={() =>
@@ -153,7 +192,7 @@ const FormApp = () => {
                 >
                   edit
                 </button> */}
-              </>
+                </li>
             )
           )}
         </ul>
@@ -166,6 +205,54 @@ const FormApp = () => {
           onChange={(event) => setSearchQuery(event.target.value)}
         />
         <button>Search</button>
+      </div>
+
+      <div className="filterby-container">
+        <span>FILTER BY</span>
+        <form
+          onSubmit={handleFilterBy}
+          style={{ display: "flex", flexDirection: "row" }}
+        >
+          <div>
+            <span>Date</span>
+            <br />
+            <label htmlFor="filterFrom">filterFrom</label>
+            <input type="date" id="filterFrom" name="filterFrom" />
+            <br />
+            <label htmlFor="filterTo">filterTo</label>
+            <input type="date" id="filterTo" name="filterTo" />
+            <br />
+          </div>
+          <div>
+            <label htmlFor="filterCategory">Category:</label>
+            <br />
+            <select id="filterCategory" name="filterCategory">
+              <option value="">All</option>
+              <option value="personal">Personal</option>
+              <option value="work">Work</option>
+              <option value="education">Education</option>
+              <option value="shopping">Shopping</option>
+              <option value="finance">Finance</option>
+              <option value="health and wellness">Health and Wellness</option>
+              <option value="social">Social</option>
+              <option value="hobbies">Hobbies</option>
+              <option value="miscellaneous">Miscellaneous</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="filterPriority">Priority:</label>
+            <br />
+            <select id="filterPriority" name="filterPriority">
+              <option value="">All</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+            <br />
+          </div>
+          <button type="submit">Submit filters</button>
+          <button onClick={handleFilterReset}>Reset filters</button>
+        </form>
       </div>
     </>
   );
