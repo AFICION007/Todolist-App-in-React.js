@@ -18,7 +18,7 @@ const FormApp = () => {
       {
         id: count,
         task: task.value,
-        is_completed: is_completed.value,
+        is_completed: is_completed.checked,
         category: category.value,
         due_date: due_date.value,
         priority: priority.value,
@@ -192,7 +192,7 @@ const FormApp = () => {
               <li key={id}>
                 <span>{task}</span>
                 <br />
-                <input type="checkbox" checked={is_completed}></input>
+                <input type="checkbox" checked={is_completed} disabled></input>
                 <br />
                 <span>{category}</span>
                 <br />
