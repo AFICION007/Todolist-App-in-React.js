@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 const FormApp = () => {
   const [count, setCount] = useState(0);
@@ -87,6 +87,35 @@ const FormApp = () => {
     }
   );
 
+  const [sortby, setSortBy] = useState("");
+  const [order, setOrder] = useState("ascending");
+
+  const sortedTodos = useMemo(() => {
+    const priorityValues = { low: 0, medium: 1, high: 2 };
+
+    return [...filteredTodos].sort((todo1, todo2) => {
+      if (order === "ascending") {
+        if (sortby === "due_date") {
+          return new Date(todo1.due_date) - new Date(todo2.due_date);
+        }
+        if (sortby === "priority") {
+          return (
+            priorityValues[todo1.priority] - priorityValues[todo2.priority]
+          );
+        }
+      } else {
+        if (sortby === "due_date") {
+          return new Date(todo2.due_date) - new Date(todo1.due_date);
+        }
+        if (sortby === "priority") {
+          return (
+            priorityValues[todo2.priority] - priorityValues[todo1.priority]
+          );
+        }
+      }
+    });
+  }, [filteredTodos, sortby, order]);
+
   return (
     <>
       <div className="form-container">
@@ -149,7 +178,7 @@ const FormApp = () => {
       </div>
       <div className="todolist-container">
         <ul>
-          {filteredTodos.map(
+          {sortedTodos.map(
             ({
               id,
               task,
@@ -160,21 +189,21 @@ const FormApp = () => {
               subtask,
               tag,
             }) => (
-                <li key={id}>
-                  <span>{task}</span>
-                  <br />
-                  <input type="checkbox" checked={is_completed}></input>
-                  <br />
-                  <span>{category}</span>
-                  <br />
-                  <span>{due_date}</span>
-                  <br />
-                  <span>{priority}</span>
-                  <br />
-                  <span>{subtask}</span>
-                  <br />
-                  <span>{tag}</span>
-                  <br />
+              <li key={id}>
+                <span>{task}</span>
+                <br />
+                <input type="checkbox" checked={is_completed}></input>
+                <br />
+                <span>{category}</span>
+                <br />
+                <span>{due_date}</span>
+                <br />
+                <span>{priority}</span>
+                <br />
+                <span>{subtask}</span>
+                <br />
+                <span>{tag}</span>
+                <br />
                 <button onClick={() => handleDelete(id)}>delete</button>
                 {/* <button
                   onClick={() =>
@@ -192,7 +221,7 @@ const FormApp = () => {
                 >
                   edit
                 </button> */}
-                </li>
+              </li>
             )
           )}
         </ul>
@@ -206,6 +235,7 @@ const FormApp = () => {
         />
         <button>Search</button>
       </div>
+      <br />
 
       <div className="filterby-container">
         <span>FILTER BY</span>
@@ -214,12 +244,12 @@ const FormApp = () => {
           style={{ display: "flex", flexDirection: "row" }}
         >
           <div>
-            <span>Date</span>
+            <span>Date:</span>
             <br />
-            <label htmlFor="filterFrom">filterFrom</label>
+            <label htmlFor="filterFrom">From</label>
             <input type="date" id="filterFrom" name="filterFrom" />
             <br />
-            <label htmlFor="filterTo">filterTo</label>
+            <label htmlFor="filterTo">To</label>
             <input type="date" id="filterTo" name="filterTo" />
             <br />
           </div>
@@ -253,6 +283,32 @@ const FormApp = () => {
           <button type="submit">Submit filters</button>
           <button onClick={handleFilterReset}>Reset filters</button>
         </form>
+      </div>
+      <br />
+
+      <div className="sortby-container">
+        <span>SORT BY</span>
+        <select
+          name="sortby"
+          id="sortby"
+          value={sortby}
+          onChange={(event) => setSortBy(event.target.value)}
+        >
+          <option value="">None</option>
+          <option value="due_date">Due date</option>
+          <option value="priority">Priority</option>
+        </select>
+
+        <label htmlFor="order">Order:</label>
+        <select
+          name="order"
+          id="order"
+          value={order}
+          onChange={(event) => setOrder(event.target.value)}
+        >
+          <option value="ascending">ascending</option>
+          <option value="descending">descending</option>
+        </select>
       </div>
     </>
   );
