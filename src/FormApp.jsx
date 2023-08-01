@@ -35,6 +35,43 @@ const FormApp = () => {
     setTodos(todos.filter((todo) => todo.id !== id));
   };
 
+  const [editingId, setEditingId] = useState(-1);
+
+  const handleEdit = (id) => {
+    setEditingId(id);
+  };
+
+  const handleEditSubmit = (event) => {
+    const {
+      editTask,
+      editIsCompleted,
+      editCategory,
+      editDueDate,
+      editPriority,
+      editSubtask,
+      editTag,
+    } = event.target.elements;
+
+    setTodos((prevTodos) =>
+      prevTodos.map((todo) =>
+        todo.id === editingId
+          ? {
+              ...todo,
+              task: editTask.value,
+              is_completed: editIsCompleted.checked,
+              category: editCategory.value,
+              due_date: editDueDate.value,
+              priority: editPriority.value,
+              subtask: editSubtask.value,
+              tag: editTag.value,
+            }
+          : todo
+      )
+    );
+
+    setEditingId(-1);
+  };
+
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     fromDate: "",
@@ -188,41 +225,100 @@ const FormApp = () => {
               priority,
               subtask,
               tag,
-            }) => (
-              <li key={id}>
-                <span>{task}</span>
-                <br />
-                <input type="checkbox" checked={is_completed} disabled></input>
-                <br />
-                <span>{category}</span>
-                <br />
-                <span>{due_date}</span>
-                <br />
-                <span>{priority}</span>
-                <br />
-                <span>{subtask}</span>
-                <br />
-                <span>{tag}</span>
-                <br />
-                <button onClick={() => handleDelete(id)}>delete</button>
-                {/* <button
-                  onClick={() =>
-                    handleEdit(
-                      id,
-                      task,
-                      is_completed,
-                      category,
-                      due_date,
-                      priority,
-                      subtask,
-                      tag
-                    )
-                  }
-                >
-                  edit
-                </button> */}
-              </li>
-            )
+            }) => {
+              if (id !== editingId) {
+                return (
+                  <li key={id}>
+                    <span>{task}</span>
+                    <br />
+                    <input
+                      type="checkbox"
+                      checked={is_completed}
+                      disabled
+                    ></input>
+                    <br />
+                    <span>{category}</span>
+                    <br />
+                    <span>{due_date}</span>
+                    <br />
+                    <span>{priority}</span>
+                    <br />
+                    <span>{subtask}</span>
+                    <br />
+                    <span>{tag}</span>
+                    <br />
+                    <button onClick={() => handleDelete(id)}>delete</button>
+                    <button
+                      onClick={() =>
+                        handleEdit(
+                          id,
+                          task,
+                          is_completed,
+                          category,
+                          due_date,
+                          priority,
+                          subtask,
+                          tag
+                        )
+                      }
+                    >
+                      edit
+                    </button>
+                  </li>
+                );
+              } else {
+                return (
+                  <li key={id}>
+                    <form onSubmit={handleEditSubmit}>
+                      <input type="text" id="editTask" defaultValue={task} />
+                      <input
+                        type="checkbox"
+                        id="editIsCompleted"
+                        defaultChecked={is_completed}
+                      />
+
+                      <select id="editCategory" defaultValue={category}>
+                        <option value="">None</option>
+                        <option value="personal">Personal</option>
+                        <option value="work">Work</option>
+                        <option value="education">Education</option>
+                        <option value="shopping">Shopping</option>
+                        <option value="finance">Finance</option>
+                        <option value="health and wellness">
+                          Health and Wellness
+                        </option>
+                        <option value="social">Social</option>
+                        <option value="hobbies">Hobbies</option>
+                        <option value="miscellaneous">Miscellaneous</option>
+                      </select>
+                      <br />
+
+                      <input
+                        id="editDueDate"
+                        type="date"
+                        defaultValue={due_date}
+                      />
+                      <br />
+
+                      <select id="editPriority" defaultValue={priority}>
+                        <option value="">None</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                      </select>
+
+                      <input
+                        type="text"
+                        id="editSubtask"
+                        defaultValue={subtask}
+                      />
+                      <input type="text" id="editTag" defaultValue={tag} />
+                      <button type="submit">update</button>
+                    </form>
+                  </li>
+                );
+              }
+            }
           )}
         </ul>
       </div>
@@ -235,8 +331,6 @@ const FormApp = () => {
         />
         <button>Search</button>
       </div>
-      <br />
-
       <div className="filterby-container">
         <span>FILTER BY</span>
         <form
@@ -284,8 +378,6 @@ const FormApp = () => {
           <button onClick={handleFilterReset}>Reset filters</button>
         </form>
       </div>
-      <br />
-
       <div className="sortby-container">
         <span>SORT BY</span>
         <select
